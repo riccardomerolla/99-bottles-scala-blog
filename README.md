@@ -1,3 +1,3 @@
-# Effect Oriented Programming
+# 99 Bottles of Scala
 
-The book is published: https://effectorientedprogramming.com/
+The blog is published: https://world.hey.com/riccardo.merolla/
