@@ -16,10 +16,9 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^11.0.0",
-    "front-matter": "^4.0.2",
     "glob": "^10.3.10",
     "marked": "^5.1.2",
-    "puppeteer": "^22.8.2"
+    "puppeteer": "^21.7.0"
   },
   "devDependencies": {
     "@types/marked": "^5.0.2",
