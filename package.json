@@ -17,8 +17,7 @@
   "dependencies": {
     "commander": "^11.0.0",
     "glob": "^10.3.10",
-    "marked": "^5.1.2",
-    "puppeteer": "^21.7.0"
+    "marked": "^5.1.2"
   },
   "devDependencies": {
     "@types/marked": "^5.0.2",

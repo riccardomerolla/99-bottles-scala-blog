@@ -1,0 +1,43 @@
+name: Ray.so Image Generator
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'blog/**/*.md'
+      - 'book/src/**/*.md'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  generate-images:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        
+    - name: Set up SBT
+      uses: actions/setup-scala@v4
+      with:
+        scala-version: '3.3.0'
+    
+    - name: Build and run Ray.so generator
+      run: |
+        cd tools/ray-so-generator
+        sbt compile
+        sbt run
+        
+    - name: Upload generated images
+      uses: actions/upload-artifact@v3
+      with:
+        name: ray-so-images
+        path: |
+          blog/**/images/**/*.png
+          book/src/**/images/**/*.png
