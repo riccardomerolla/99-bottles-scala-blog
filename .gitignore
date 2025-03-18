@@ -1,0 +1,88 @@
+# Scala/SBT specific
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+.bsp/
+.scala-build/
+*.class
+*.log
+
+# Node.js specific
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+.npm/
+.pnpm-store/
+
+# TypeScript specific
+dist/
+*.tsbuildinfo
+.tscache/
+
+# Book generated files
+book/generated/
+book/src/metadata.yaml
+
+# Ray.so generated images
+blog/images/
+book/src/images/
+
+# Generated code files
+code/src/main/scala/extracted/
+
+# IDEs
+.idea/
+.vscode/
+*.sublime-*
+.metals/
+.bloop/
+.project
+.classpath
+.settings
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Hugo
+.hugo_build.lock
+public/
+resources/
+
+# Build artifacts
+*.pdf
+*.epub
+*.mobi
+*.html
+
+# Temporary files
+*.swp
+*.swo
+*~
+.~*#
+.#*
+*.tmp
+*.bak
+*.old
+
+# Environment files
+.env
+.env.local
+.env.*.local

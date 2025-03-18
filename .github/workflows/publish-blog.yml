@@ -20,20 +20,19 @@ jobs:
           node-version: '18'
           
       - name: Install dependencies
-        run: |
-          npm install
+        run: npm ci
           
-      - name: Build TypeScript
-        run: npm run build
-        
       - name: Generate Ray.so code images
-        run: node dist/tools/ray-so-generator/convert-to-ray.js
+        run: npm run generate-images
         
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v2
         with:
           hugo-version: '0.101.0'
           extended: true
+          
+      - name: Copy Hugo config
+        run: cp config/hugo.yaml config.yaml
           
       - name: Build site
         run: hugo --minify
@@ -43,9 +42,3 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
-          
-      - name: Publish to Dev.to (if configured)
-        if: success() && hashFiles('tools/publish-devto.js') != ''
-        run: node tools/publish-devto.js
-        env:
-          DEVTO_API_KEY: ${{ secrets.DEVTO_API_KEY }}
