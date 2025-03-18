@@ -1,0 +1,52 @@
+baseURL: 'https://riccardomerolla.github.io/scala-zio-blog/'
+languageCode: 'en-us'
+title: '99 Bottles of Scala'
+theme: 'PaperMod'
+
+params:
+  description: "Adventures in Scala and ZIO for Effect-Oriented Programming"
+  author: "Riccardo Merolla"
+  # Enable comments by entering your Disqus shortname
+  disqusShortname: ""
+  # Enable Google Analytics by entering your tracking code
+  googleAnalytics: ""
+  
+  # PaperMod theme options
+  homeInfoParams:
+    Title: "Scala & ZIO Blog"
+    Content: "Exploring functional and effect-oriented programming with Scala and ZIO"
+  
+  socialIcons:
+    - name: "github"
+      url: "https://github.com/riccardomerolla/scala-zio-blog"
+    - name: "twitter"
+      url: "https://twitter.com/rickydjit"
+  
+  ShowReadingTime: true
+  ShowShareButtons: true
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowCodeCopyButtons: true
+  
+menu:
+  main:
+    - identifier: categories
+      name: Categories
+      url: /categories/
+      weight: 10
+    - identifier: tags
+      name: Tags
+      url: /tags/
+      weight: 20
+    - identifier: archives
+      name: Archives
+      url: /archives/
+      weight: 30
+    - identifier: book
+      name: Book
+      url: /book/
+      weight: 40
+    - identifier: about
+      name: About
+      url: /about/
+      weight: 50

@@ -1,0 +1,56 @@
+name: Validate Code Examples
+
+on:
+  push:
+    paths:
+      - 'code/**'
+      - 'blog/**'
+      - 'book/src/**'
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          
+      - name: Setup SBT
+        uses: coursier/setup-action@v1
+        
+      - name: Install Node.js dependencies
+        run: npm install
+        
+      - name: Extract code examples from markdown
+        run: node tools/extract-code-examples.js
+        
+      - name: Compile code examples
+        run: cd code && sbt compile
+        
+      - name: Run tests
+        run: cd code && sbt test
+        
+      - name: Run scalafmt check
+        run: cd code && sbt scalafmtCheckAll
+        
+      - name: Report status
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { issue, repo } = context;
+            if (context.payload.pull_request) {
+              github.rest.issues.createComment({
+                owner: repo.owner,
+                repo: repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: '### Code Validation Results\n\nThe code validation workflow has completed. Check the [Actions tab](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.'
+              });
+            }
