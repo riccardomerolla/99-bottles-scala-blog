@@ -1,4 +1,4 @@
-name: Ray.so Image Generator
+name: Code Image Generator
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
       - 'blog/**/*.md'
       - 'book/src/**/*.md'
+      - 'tools/**/*.ts'
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -13,27 +14,28 @@ on:
 jobs:
   generate-images:
     runs-on: ubuntu-latest
-    env:
-        JAVA_OPTS: -Xms2048M -Xmx2048M -Xss6M -XX:ReservedCodeCacheSize=256M -Dfile.encoding=UTF-8
+
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/setup-java@v4
-      with:
-        distribution: temurin
-        java-version: 17
-        cache: 'sbt'
-    - uses: sbt/setup-sbt@v1.1.7
     
-    - name: Build and run Ray.so generator
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
       run: |
-        cd tools/ray-so-generator
-        sbt compile
-        sbt run
+        npm install
+    
+    - name: Generate code images with Carbon
+      run: |
+        npm run generate-images
         
     - name: Upload generated images
       uses: actions/upload-artifact@v4
       with:
-        name: ray-so-images
+        name: code-images
         path: |
           blog/**/images/**/*.png
           book/src/**/images/**/*.png
