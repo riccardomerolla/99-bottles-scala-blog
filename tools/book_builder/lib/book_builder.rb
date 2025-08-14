@@ -14,12 +14,13 @@ end
 
 module BookBuilder
   class CLI
-    TEMPLATE = File.expand_path('../../templates/template-post.md', __dir__)
+  TEMPLATE = File.expand_path('../templates/template-post.md', __dir__)
 
     def create_post(title)
       now = Time.now.utc.strftime('%Y-%m-%d')
       filename = "#{now}-#{slugify(title)}.md"
-      dest = File.join(Dir.pwd, 'blog', filename)
+  repo_root = File.expand_path('../../../', __dir__) # three levels up from lib -> repo root
+  dest = File.join(repo_root, 'blog', filename)
 
       FileUtils.mkdir_p(File.dirname(dest))
       content = File.read(TEMPLATE)
