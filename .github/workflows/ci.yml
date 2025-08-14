@@ -26,6 +26,14 @@ jobs:
             ~/.sbt
             ~/.coursier
           key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+      - name: Install sbt via Coursier
+        run: |
+          # Download the coursier launcher and use it to install sbt (faster than apt)
+          curl -fLo cs https://github.com/coursier/launchers/releases/latest/download/cs-x86_64-pc-linux
+          chmod +x cs
+          ./cs setup sbt
+          # Make sure installed binaries are on PATH for following steps
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Run sbt tests
         run: |
@@ -91,6 +99,11 @@ jobs:
 
       - name: Run examples generator + tests
         run: |
+          # install sbt quickly via Coursier
+          curl -fLo cs https://github.com/coursier/launchers/releases/latest/download/cs-x86_64-pc-linux
+          chmod +x cs
+          ./cs setup sbt
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
           cd code
           sbt "project examples" test
 
