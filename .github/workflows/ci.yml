@@ -26,19 +26,16 @@ jobs:
             ~/.sbt
             ~/.coursier
           key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
-      - name: Install sbt via Coursier
-        run: |
-          # Download the coursier launcher and use it to install sbt (faster than apt)
-          curl -fLo cs https://github.com/coursier/launchers/releases/latest/download/cs-x86_64-pc-linux
-          chmod +x cs
-          ./cs setup sbt
-          # Make sure installed binaries are on PATH for following steps
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Cache coursier artifacts
+        uses: coursier/cache-action@v6.4
 
-      - name: Run sbt tests
+      - name: Set up Scala CLI
+        uses: VirtusLab/scala-cli-setup@v1.5
+
+      - name: Run Scala CLI tests
         run: |
           cd code || true
-          sbt test
+          scala-cli test .
 
   ruby-lint:
     runs-on: ubuntu-latest
@@ -97,15 +94,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Run examples generator + tests
+      - name: Cache coursier artifacts
+        uses: coursier/cache-action@v6.4
+
+      - name: Set up Scala CLI
+        uses: VirtusLab/scala-cli-setup@v1.5
+
+      - name: Run Scala CLI tests for examples
         run: |
-          # install sbt quickly via Coursier
-          curl -fLo cs https://github.com/coursier/launchers/releases/latest/download/cs-x86_64-pc-linux
-          chmod +x cs
-          ./cs setup sbt
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-          cd code
-          sbt "project examples" test
+          cd code/examples || true
+          scala-cli test .
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
