@@ -1,0 +1,10 @@
+// Project-wide Scala CLI directives for the `code` subproject
+// Scala version and ZIO dependencies used across sources and tests
+//> using scala "3.5.2"
+//> using dep "dev.zio::zio:2.0.15"
+//> using dep "dev.zio::zio-streams:2.0.15"
+//> using dep "dev.zio::zio-test:2.0.15"
+//> using dep "dev.zio::zio-test-sbt:2.0.15"
+
+// Note: scala-cli reads "using" directives from this file to provide
+// project-wide defaults when running `scala-cli` in `code/`.
