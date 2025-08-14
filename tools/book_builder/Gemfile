@@ -1,0 +1,6 @@
+source 'https://rubygems.org'
+
+gem 'thor'
+gem 'jekyll', '~> 4.2'
+gem 'front_matter_parser'
+gem 'tty-command'

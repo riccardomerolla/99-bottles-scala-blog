@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+require 'bundler/setup'
+require 'thor'
+require_relative '../lib/book_builder'
+
+class CLI < Thor
+  desc 'new-post TITLE', 'Create a new blog post from template'
+  def new_post(title)
+    BookBuilder::CLI.new.create_post(title)
+  end
+
+  desc 'build', 'Build the site/book'
+  def build
+    BookBuilder::CLI.new.build
+  end
+end
+
+CLI.start(ARGV)
