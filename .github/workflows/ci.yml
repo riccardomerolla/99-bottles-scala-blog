@@ -121,4 +121,6 @@ jobs:
       - name: Build site with book-builder
         run: |
           cd tools/book_builder || exit 0
+          # Ensure the script is executable in the runner
+          chmod +x bin/book-builder || true
           bundle exec bin/book-builder build
