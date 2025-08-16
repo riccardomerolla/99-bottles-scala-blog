@@ -1,29 +1,72 @@
-# Scala & ZIO Blog-to-Book Automation
+# Scala & ZIO Blog → Book (Scala CLI + Ruby)
 
-A project to create blog posts about Scala and ZIO, with automated tooling to convert them into a published book.
+This repository is focused on authoring Scala + ZIO content (blog posts and a book) with two first-class toolchains:
 
-## Features
+- Scala examples and tests driven by Scala CLI (`scala-cli`)
+- A small Ruby CLI (Thor) `book-builder` for creating and building posts/site
 
-- Markdown-based content for blog posts and book chapters
-- Automated code validation for all examples
-- Beautiful code snippets generated with ray.so
-- CI/CD pipelines for publishing blog and generating book
-- AI-assisted content creation tools
+Legacy JS/TS/Python tooling has been archived; the active stack is Scala + Ruby.
 
-## Getting Started
+## Quickstart (local)
 
-1. Clone this repository
-2. Install dependencies: `npm install`
-3. Build tools: `npm run build`
-4. Create your first blog post: `npm run new-post "My First Scala ZIO Post"`
+### Prerequisites
 
-## Writing Blog Posts
+- `scala-cli` (recommended) — used in CI via `VirtusLab/scala-cli-setup`
+- Ruby 3.2+, `bundler` — used for `tools/book_builder`
 
-Blog posts should be created in the `blog/` directory using Markdown. Code examples will automatically be validated and converted to beautiful images.
+### Setup
 
-## Building the Book
-
-When you're ready to compile the book:
+Run all Scala tests (root):
 
 ```bash
-npm run build-book
+cd code
+scala-cli test .
+```
+
+Run examples-only tests:
+
+```bash
+cd code/examples
+scala-cli test .
+```
+
+Create a new post using the Ruby book-builder:
+
+```bash
+cd tools/book_builder
+gem install bundler
+bundle install --jobs 4 --retry 3
+# make script executable locally if needed
+chmod +x bin/book-builder
+bundle exec bin/book-builder new-post "My First Scala ZIO Post"
+```
+
+Build the static site (Jekyll) with the book-builder:
+
+```bash
+cd tools/book_builder
+bundle exec bin/book-builder build
+```
+
+Run the Ruby unit tests:
+
+```bash
+cd tools/book_builder
+bundle exec rspec --format documentation
+```
+
+## Repository notes
+
+- Project-wide scala-cli directives live at `code/using.sc` (Scala version + ZIO deps).
+- Extracted/incomplete snippet sources have been archived under `tools/extracted_archive/` to avoid compiling partial snippets.
+- Legacy or neutralized scripts live under `tools/legacy/` (kept for reference only).
+
+## CI notes
+
+- GitHub Actions uses `VirtusLab/scala-cli-setup` + `coursier/cache-action` to run `scala-cli test`.
+- The Ruby `book-builder` is exercised in CI; the workflow ensures the `bin/book-builder` script is executable before invocation.
+
+If you want me to:
+
+- Mark `tools/book_builder/bin/book-builder` executable in git (preferred), I can open a PR to set the executable bit; or
+- Centralize scala-cli using directives into a single `project.scala` file under `code/`.

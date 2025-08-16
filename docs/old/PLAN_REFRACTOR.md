@@ -296,3 +296,100 @@ Notes
 
 Contact
 - Update this file with task assignments, PR links, and CI statuses as work proceeds.
+
+## Phase F — Social publishing & AI enrichment (2 weeks)
+
+Goal
+- Provide a safe, auditable CI-driven path to publish new blog posts to social platforms (X and LinkedIn) with an optional AI-based enhancement step. Keep publishing opt-in and human-reviewed by default.
+
+Approach & options (pick one as rollout default)
+- Option A — PR preview (recommended default): when a post is created or changed, generate a preview branch/PR that contains a manifest with suggested social captions (AI optional). Humans review and click a workflow dispatch or merge to trigger final publish jobs.
+- Option B — Manual dispatch: generate the manifest and expose a `workflow_dispatch` — maintainers manually trigger publish jobs after review.
+- Option C — Auto-publish on merge (higher risk): merge to `main` triggers publish jobs directly. Use only after a trial period and with strict idempotency and rate-limits.
+
+CI job layout (example)
+- `prepare-manifest` — Detect new/changed posts in `blog/` and emit `posts-manifest.json` (slug, title, excerpt, cover_image, path, idempotency_key). Exit 0 with empty manifest when nothing to publish.
+- `ai-enhance` (optional, gated by `ENABLE_AI=true`) — Read `posts-manifest.json`, call the AI enhancer to suggest captions, hashtags, and an optional shortened excerpt; write `posts-manifest.enriched.json`.
+- `publish-x` — For each manifest entry, call X API using secrets, respecting `posted_to` and `idempotency_key`. Update a local metadata file or create a commit/PR that adds `posted_to: [x]` to the post front matter.
+- `publish-linkedin` — Same as `publish-x` but using LinkedIn API and appropriate scopes.
+- `notify` — Optional job to create a release note or add a comment to a PR summarizing published posts and links.
+
+Manifest contract (posts-manifest.json)
+- An array of post objects with keys:
+  - slug: string (filename-safe id)
+  - title: string
+  - excerpt: string (plain text)
+  - cover_image: string | null (relative path or URL)
+  - path: string (repo path to markdown)
+  - idempotency_key: string (UUID derived from slug + git sha or date)
+  - posted_to: [] (platforms already published, optional)
+
+Idempotency & safety
+- Each publish job MUST check `posted_to` or an external status store before attempting to publish to avoid duplicates.
+- Use `idempotency_key` when calling platform APIs where supported.
+- Jobs must be retry-safe and use exponential backoff on API failures.
+
+AI enhancer (optional)
+- Gate with `ENABLE_AI` and an `AI_API_KEY` secret. If disabled, the pipeline skips enhancement and publishers use the raw excerpt.
+- The enhancer should be small and deterministic: given the same manifest+seed it returns the same captions. Store the AI response in `posts-manifest.enriched.json` to allow human review.
+- Do not commit API keys or raw AI outputs to main by default — write outputs into the workflow run artifacts and into a review PR only when the human reviewer approves.
+
+Required secrets & permissions
+- X (Twitter) API token(s) and app key/secret — store as `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, `X_ACCESS_SECRET`.
+- LinkedIn OAuth token with appropriate publisher scopes — `LINKEDIN_ACCESS_TOKEN`.
+- (Optional) `AI_API_KEY` for the AI enhancer.
+- A GitHub Actions bot token if the pipeline will commit metadata back to the repo (use a least-privilege machine account): `GITHUB_PUBLISH_BOT_TOKEN`.
+
+Implementation notes & scripts
+- `scripts/prepare_manifest.rb` (or `code/PrepareManifest.scala`) — lightweight script to detect changed markdown files since last main, parse front matter, and emit manifest JSON.
+- `scripts/ai_enhance.rb` — small wrapper that posts to AI service and enriches the manifest; write outputs to artifacts for review.
+- `scripts/publish_x.rb` and `scripts/publish_linkedin.rb` — idempotent publishers that accept a single post manifest entry and return a status object.
+
+Rollout recommendation
+- Start with Option A (PR-preview) and `ai-enhance` turned off. Verify the manifest contents and manual publish flow.
+- Enable `ai-enhance` in a separate experiment branch and surface enriched captions in the PR for reviewer approval.
+- After 2–4 successful manual publish runs, consider Option C for fully automatic publish with strict monitoring and audit logs.
+
+Edge cases & mitigations
+- Rate limits: batch and throttle API calls; implement exponential backoff and abort on sustained 4xx/5xx errors.
+- Failed publishes: do not drop the post — mark it `publish_failed` in metadata and create an issue or PR for manual intervention.
+- Reverts and edits: if a post is updated after publish, re-run prepare-manifest; publishers should create update posts where platform APIs support edits or create follow-up posts with a link to the updated post.
+
+Quality gates
+- Dry-run mode: publishers must support `--dry-run` to surface what would be posted without performing API calls.
+- Smoke test: add a `publish-sandbox` job that posts to a sandbox/test account to validate credentials and API changes.
+
+Minimal CI snippet (conceptual)
+```
+jobs:
+  prepare-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare manifest
+        run: scripts/prepare_manifest.rb --output posts-manifest.json
+
+  ai-enhance:
+    needs: prepare-manifest
+    if: env.ENABLE_AI == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: AI enhance
+        run: scripts/ai_enhance.rb posts-manifest.json --output posts-manifest.enriched.json
+
+  publish-x:
+    needs: [prepare-manifest, ai-enhance]
+    secrets: [X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN, X_ACCESS_SECRET, GITHUB_PUBLISH_BOT_TOKEN]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish to X (dry-run)
+        run: scripts/publish_x.rb posts-manifest.enriched.json --dry-run
+```
+
+Mapping to PLAN_REFRACTOR checklist
+- This phase covers: Phase D extras (AI & image plugins) integration surface and extends CI (Phase B). It is optional and gated — mark as Priority D in the main checklist.
+
+Contact
+- Update this file with task assignments, PR links, and CI statuses as work proceeds.
